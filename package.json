@@ -1,0 +1,17 @@
+{
+  "name": "smallest-agent-compose-course",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "setup": "npm --prefix backend install",
+    "dev": "npm --prefix backend run dev",
+    "build": "npm run generate:lesson && npm --prefix backend run build",
+    "typecheck": "npm --prefix backend run typecheck",
+    "test": "npm --prefix backend test",
+    "generate:lesson": "node scripts/generate-lesson.mjs",
+    "android:build": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Android.ps1 -Task Build",
+    "android:test": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Android.ps1 -Task Test",
+    "android:lint": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Android.ps1 -Task Lint",
+    "android:install": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/Android.ps1 -Task Install"
+  }
+}

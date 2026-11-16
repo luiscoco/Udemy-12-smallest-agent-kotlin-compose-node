@@ -1,0 +1,86 @@
+You are working in an EMPTY folder. Create a complete independently runnable application: The Smallest Agent, Lesson 0, native Kotlin + Jetpack Compose Android frontend with a Node.js + TypeScript backend.
+
+Create a new folder named 12-smallest-agent-kotlin-compose-node. Preserve all earlier applications and prompts. Save this full standalone prompt beside the other root prompts as Prompt - Create the Enterprise Web Application from Scratch - Kotlin Compose Android NodeJS TypeScript.txt and an identical BUILD-PROMPT.txt inside the new folder. Never read, copy, display or borrow any previous real environment file/key. Create only backend/.env.example and never overwrite a real .env.
+
+ARCHITECTURE AND STACK
+- Build a genuine native Android application with Kotlin, Jetpack Compose and Material 3. No React Native, Ionic, Flutter, DOM frontend or WebView substitute. The UI is opened on Android; the PC hosts the API and custom API documentation.
+- Use an activity-scoped ViewModel, StateFlow, coroutines and lifecycle-aware Compose state collection. Five native lesson tabs preserve prompt, mode, answer and timeline. Theme and a public API URL persist with Android preferences. Support Android configuration changes. Do not retain or store the Claude key on Android.
+- Actual TypeScript Claude Agent SDK runs only in Node: query({prompt, options}) -> for await -> final result. Keep the recognizable smallest-agent loop. No Python bridge, direct REST replacement, client SDK import or fabricated live inference.
+- Use compatible pinned Android tools and a checksum-verified Gradle wrapper. Verified baseline: AGP 9.3.3 with built-in Kotlin, Compose compiler plugin 2.3.0, Gradle 9.7.1, Compose BOM 2025.09.01, JDK 17+ (tested JDK 21), compile/target SDK 36 and min SDK 26. Match Kotlin/compiler versions; do not apply an incompatible legacy Kotlin Android plugin under built-in Kotlin. Node 24 LTS and Agent SDK 0.3.319.
+- Native OkHttp asynchronously handles JSON and POST SSE off the main thread. Coroutine cancellation cancels the underlying call. Use native text/spans for colored code and answers. Render a trusted local UML SVG natively (e.g. AndroidSVG), never model HTML/scripts.
+
+STRUCTURE AND WINDOWS RUNNING
+- Root package.json supplies setup, dev, typecheck, test, generate:lesson, build, android:build, android:test, android:lint and android:install. setup installs the independent Node backend. build regenerates native lesson assets and builds Node. Android build produces a real debug APK, not just a platform template.
+- backend contains its own package.json/lockfile, strict tsconfig, src/config.ts, agent-service.ts, handlers.ts, server.ts, docs and public contracts. No mobile imports belong in the server, and no server/config module belongs in Android.
+- android contains a normal Gradle project/app module, wrapper, manifests, resources, assets, Kotlin entry point, API/parser, ViewModel, Compose screens/components and meaningful unit/UI tests. Native source must compile. Do not claim APK/device/runtime verification without actually performing it.
+- Include README.md, ASSETS.md, VERIFICATION.md, BUILD-PROMPT.txt, .gitignore, Start-Backend.ps1 and scripts/Android.ps1.
+- Exact Windows instructions start from Lesson 0, cd into this new folder, npm install, npm run setup, guarded own .env example copy, edit the key and npm run dev. Backend defaults to 127.0.0.1:8700. Use cwd-safe helpers; never depend on a previous project's runtime/environment.
+- Native instructions open the android folder in a compatible Android Studio, select an API 26+ device/emulator and Run. CLI commands build/test/lint/install from the root. Explain the debug APK output path. Installation, IDE launch, release signing and Play Store submission are explicit user commands, not automatic side effects.
+- The Windows helper uses JAVA_HOME / ANDROID_HOME or discovers Android Studio/Visual Studio JDK/SDK paths without modifying system environment. Validate SDK 36 and Build Tools 36.0.0. Keep dependency caches ignored. For deep Windows paths, AAPT2 may fail to start even when Kotlin compiles: cache the exact compiler at a shorter path, verify its official Google Maven archive hash and pass the local override, or use another verified compatible path strategy. Do not install system runtimes or change SDK ACLs unnecessarily.
+- Include actual GET /api/health, POST /api/agent/query and POST /api/agent/stream, plus accurate /docs custom reference and /openapi.json. Do not call a custom page Swagger UI.
+
+PRESERVE ALL REQUESTED DESIGN AND LEARNING CONTENT
+Reference https://github.com/luiscoco/Udemy-Claude-Agent-SDK-lesson01-app for the course style. Copy only individually identified safe source/tests/public assets, never folders containing credentials. Preserve astronaut provenance and upstream rights.
+
+Large readable typography: body around 21 sp, secondary/floating labels at least 16 sp, code 18 sp, generous line height, strong headings, 48 dp touch targets and accessible semantics. Respect Android font scale and safe drawing/IME insets. Use pastel blue input, mint answer, lilac event inspector and alternating peach/blue/mint/lilac teaching cards. Persistent accessible light/dark mode includes readable system bar icons. Use adaptive layouts and bounded horizontal code/diagram scrolling, rather than shrinking code to unreadable size.
+
+Syntax-colored, selectable native code snippets must be formatted, indented and show actual source filenames. Highlight Kotlin, TypeScript, JSON and PowerShell, with escaped/plain unknown-language fallback and native copy. Model output must remain safe native text/spans; support a documented Markdown subset including headings, bold, HTTP(S) links and colored fenced code. Unsupported markup stays literal. Never execute model HTML or load model images/scripts in a WebView.
+
+FIVE COMPLETE SECTIONS
+1. Agent lab: course hero/astronaut/stack context, API/key-presence status and theme; default Hello-world prompt, examples, trimmed 1–4000 counter; Stream/Simple, synchronous duplicate lock before any await, disabled busy controls, cancel, elapsed time and optional physical keyboard Ctrl+Enter. Real final answer, turns, duration, estimated USD cost with null labelled unavailable, and is_error. Native clipboard, Markdown document save and share sheet. Timestamped safe SDK rows with expandable colored JSON; LazyColumn virtualization and a 500-row display cap without losing final processing. Idle/loading/success/error and accessible snackbar; specific safe server errors remain visible. No fake seeded live answers.
+2. Learn: at least six substantial cards on native UI/state, minimal SDK loop, server-only credentials, messages versus token deltas, isolation and final result semantics.
+3. Run: exact Windows commands; editable persistent public API base URL and health recheck; own backend key/model/system prompt/turn settings; emulator/USB/LAN/HTTPS instructions; native build/test/lint/install and production notes. State that key presence does not prove authentication or available credits.
+4. Architecture & workflow: a real UML sequence with five lifelines (Student/Device, Kotlin Compose client, Node API, TypeScript Agent SDK/CLI, Claude API), call/return arrows, a message loop and success/provider-failure/input-key alternatives. Render the local diagram natively with horizontal scrolling. Save SVG and editable PlantUML using Android's document picker.
+5. Walkthrough: at least five actual colored Kotlin/TypeScript source excerpts with filename and clear explanation from input to safe answer. No unrelated-stack snippets or pseudocode presented as implemented source.
+
+MANDATORY UML SOURCE CARDS
+Exactly 16 numbered interactions; each has its own matching numbered pastel card with title, actual source filename, formatted colored excerpt and explanation:
+1 submit prompt; 2 POST stream; 3 validation/options; 4 Node delegation; 5 SDK/provider call boundary; 6 model response observation through SDK iterator; 7 safe projection; 8 SSE frame; 9 native StateFlow update; 10 normalized final metrics; 11 ResultMessage dispatch; 12 safe answer/metrics; 13 final result plus done enforcement; 14 safe SSE error without done; 15 UI error/snackbar; 16 missing-key/input rejection before SDK work.
+
+Generate excerpts deterministically from real files using stable markers. Tolerate formatter line breaks but fail missing markers, duplicate/nonconsecutive numbers or mismatched SVG/PlantUML labels. All 16 card titles must match diagram interactions. For internal model transport, show query/iterator at the application boundary and explain SDK ownership, rather than inventing an application HTTP call to Claude.
+
+SVG shapes must carry explicit fill/stroke/stroke-width/stroke-dasharray/marker-end/font attributes. Do not rely on CSS classes or style blocks that native parsers can ignore. Alternative frames use fill="none". Keep native/download assets generated from the same template. Verify actual arrows, dashed lifelines, transparent frames and labels; existence of an SVG file alone is insufficient. Preserve the correction for the previous edition's black frames/missing arrows.
+
+PRIVATE SERVER AND PUBLIC ANDROID CONFIGURATION
+backend/.env.example:
+ANTHROPIC_API_KEY=sk-ant-replace-with-your-key
+CLAUDE_MODEL=
+AGENT_SYSTEM_PROMPT=You are a concise teaching assistant.
+AGENT_MAX_TURNS=1
+API_HOST=127.0.0.1
+API_PORT=8700
+ALLOWED_ORIGINS=
+
+Load only this backend file relative to its module, with process-environment precedence. Empty model uses SDK default; overrides require account access. Turns default to 1 and accept integers 1–10. Placeholder keys count as missing. Ignore all real environment files and variants except examples.
+
+Android stores only a public API URL/theme, with emulator default http://10.0.2.2:8700. The Run section lets users validate/save the URL and recheck health. Reject unsafe schemes, URL credentials/query/fragment and HTTP in release builds. Do not put the Claude key in BuildConfig, resources, preferences, native assets or APK.
+
+Emulator 10.0.2.2 reaches the PC. USB phones can use adb reverse tcp:8700 tcp:8700 plus app URL http://127.0.0.1:8700. For LAN, set API_HOST=0.0.0.0, use the PC's reachable LAN IP and allow the firewall port. A phone's localhost is the phone. Debug manifests may permit local HTTP; release manifests must block cleartext and require HTTPS with trusted certificates. No trust-all TLS bypass. Native clients need no browser Origin; CORS is not authentication.
+
+SERVER, STREAMING AND CLEANUP
+- Health returns status and api_key_configured only. Query accepts JSON {prompt} and returns result, num_turns, duration_ms, total_cost_usd and is_error. Stream accepts the same input and emits safe UTF-8 SSE message projections, then done; failures emit error without done. Streaming is SDK-message-level rather than token deltas.
+- Bound actual body bytes at 32 KiB and validate JSON media/syntax, Origin and strict trimmed prompt length before SDK. Safe 400/415/403/413/422 errors never echo submitted values. Native no-Origin requests are accepted; optional browser Origins must exactly match configured protocol/host/port. Do not trust forwarded headers.
+- Missing key gives query 503 or SSE error; provider failure gives query 502 or safe SSE error. No SDK calls on invalid/missing-key paths. Do not expose raw provider exceptions, secrets, filesystem paths or request contents.
+- SDK options explicitly disable built-in tools with tools=[], plus allowedTools=[], dontAsk, empty settings/skills/plugins/MCP, strict MCP, no persisted session and bounded maxTurns. Clearing allowedTools alone is not a tool ban. Disable remote Claude.ai MCP and pass the own key through subprocess options without process-wide environment mutation.
+- Project only text/subtype/model/final metrics; exclude thinking, tool arguments, raw SDK/environment/config and session/path data. Redact exact key occurrences before truncating summaries. Error subtypes remain errors even when is_error=false; done cannot override an error result.
+- Node heartbeat comments, three-minute deadline, response backpressure and disconnect handling must clean up timers/listeners and close SDK conversations in finally. The native client must cancel its actual HTTP call on coroutine cancellation and close response bodies on all paths.
+- Kotlin validates message/result contracts, handles UTF-8 split across socket reads, LF/CRLF, comments, partial/multiple SSE frames and multiline data. It requires a final result plus done, treats early EOF as failure, bounds event accumulation and retains is_error.
+- Native save uses the document picker. Sharing uses an unexported FileProvider limited to a generated cache directory with temporary URI grants. Avoid broad storage permissions. Retain the answer across configuration changes while completing a document save.
+
+VERIFICATION AND DELIVERY
+Run strict Node TypeScript checks and meaningful injected SDK/handler tests for input/origin/body limits, missing key, option isolation, redaction, safe failure, missing final result, error subtype and iterator/request cancellation. Exercise real HTTP health/docs/schema/validation/missing-key behavior with credentials explicitly disabled. Never spend API credits during fixture tests.
+
+Compile a real Android debug APK with the Gradle wrapper and installed SDK/JDK. Run native parser/OkHttp tests and Compose navigation tests (Robolectric is acceptable when no emulator is available), covering all five tabs, selected state, retained prompt/answer, six learning cards, the sixteenth source explanation, colored snippets, typography and theme. Add Android lint appropriate to the build. Tests should validate behavior rather than mirror implementation.
+
+Inspect the native UML rendering or a useful artifact when possible; report precise limits if device/graphics runtime is unavailable. Validate deterministic generation, matching prompt copies, APK asset contents and absence of credentials in native packaging. Distinguish local JVM/Compose checks, APK compilation, installed emulator/device execution and live provider inference. Do not claim any check not performed.
+
+Provide README, provenance and VERIFICATION with actual commands/results and material limitations. Preserve earlier work; stop only owned test servers. Deliver the new native project, prompt, debug APK when built, and concise Windows backend/build/open instructions. Do not automatically install on a user's phone, launch IDEs, sign releases, deploy or submit stores.
+
+Official references:
+https://developer.android.com/develop/ui/compose
+https://developer.android.com/build/migrate-to-built-in-kotlin
+https://developer.android.com/build/releases/agp-9-3-0-release-notes
+https://developer.android.com/develop/ui/compose/setup-compose-dependencies-and-compiler
+https://bigbadaboom.github.io/androidsvg/
+https://square.github.io/okhttp/
+https://code.claude.com/docs/en/agent-sdk/typescript

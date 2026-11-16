@@ -1,0 +1,34 @@
+@startuml
+title The Smallest Agent - Compose / Node / TypeScript Agent SDK
+autonumber
+actor "Student / Device" as Browser
+participant "Kotlin Compose client" as UI
+participant "Node route / service" as API
+participant "TypeScript Agent SDK / CLI" as SDK
+participant "Claude API" as Claude
+Browser -> UI: Run agent (prompt)
+UI -> API: POST /api/agent/stream
+alt Valid prompt and configured key
+  API -> API: Validate; tools disabled
+  API -> SDK: streamAgent() / query()
+  SDK -> Claude: Prompt; no built-in tools
+  Claude --> SDK: Model response
+  note over API, SDK: Lifecycle messages can arrive while inference runs.
+  loop Each intermediate SDK message
+    SDK --> API: Safe SDK message
+    API --> UI: SSE message event
+    UI --> Browser: Update typed state
+  end
+  alt Final result received
+    SDK --> API: ResultMessage fields
+    API --> UI: SSE ResultMessage
+    UI --> Browser: Render answer + metrics
+    API --> UI: SSE done event
+  else SDK failure or missing final result
+    API --> UI: SSE error; no done
+    UI --> Browser: Error + snackbar
+  end
+else Missing key or invalid prompt
+  API --> UI: Key: SSE error / input: 422
+end
+@enduml

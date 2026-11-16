@@ -1,0 +1,146 @@
+[
+  {
+    "number": 1,
+    "title": "Run agent (prompt)",
+    "source": "android/app/src/main/java/com/luiscoco/smallestagent/compose/LabViewModel.kt",
+    "language": "kotlin",
+    "text": "Trim native input and lock before asynchronous work.",
+    "explanation": "The activity-scoped ViewModel retains prompt, result and timeline across lesson changes and configuration changes. The Node API independently validates input.",
+    "code": "val trimmed = mutable.value.prompt.trim()\nif (locked || trimmed.isEmpty() || trimmed.length > 4000) return\nlocked = true\nval mode = mutable.value.mode\nmutable.update { it.copy(status = \"loading\", error = \"\", result = null, messages = emptyList(), elapsed = 0.0) }\nrunJob = viewModelScope.launch {\n    val started = System.nanoTime()\n    val clock = launch { while (true) { mutable.update { it.copy(elapsed = (System.nanoTime() - started) / 1e9) }; delay(100) } }\n    try {\n        val api = AgentApi(mutable.value.apiUrl); activeApi = api"
+  },
+  {
+    "number": 2,
+    "title": "POST /api/agent/stream",
+    "source": "android/app/src/main/java/com/luiscoco/smallestagent/compose/AgentApi.kt",
+    "language": "kotlin",
+    "text": "POST JSON through a real native HTTP client.",
+    "explanation": "OkHttp performs the request off the main thread. The configured public base URL belongs to Android; the Claude API key stays in backend/.env.",
+    "code": "suspend fun stream(prompt: String, onMessage: (AgentMessage) -> Unit): AgentResult = execute(request(\"/api/agent/stream\", prompt)) { response ->\n    var completed = false\n    var finalResult: AgentResult? = null\n    val source = response.body?.source() ?: throw ApiFailure(\"The API returned an empty stream.\")\n    SseReader.read(source) { event, text ->\n        val json = JSONObject(text)\n        when (event) {\n            \"error\" -> throw ApiFailure(json.optString(\"detail\", \"The agent failed.\"))\n            \"done\" -> completed = true\n            \"message\" -> {\n                val message = AgentMessage.fromJson(json)\n                if (message.type == \"ResultMessage\") finalResult = AgentResult.fromJson(message.data)\n                onMessage(message)\n            }"
+  },
+  {
+    "number": 3,
+    "title": "Validate; tools disabled",
+    "source": "backend/src/handlers.ts",
+    "language": "typescript",
+    "text": "Validate untrusted JSON on the Node server.",
+    "explanation": "The HTTP adapter bounds actual body bytes and checks configured Origins. The handler verifies media type, JSON syntax and a trimmed 1–4000 character prompt.",
+    "code": "const prompt = validatePrompt(body);\nif (prompt === null)\n  throw new InputError(\n    422,\n    \"Prompt must contain 1–4000 characters after trimming.\","
+  },
+  {
+    "number": 4,
+    "title": "streamAgent() / query()",
+    "source": "backend/src/server.ts",
+    "language": "typescript",
+    "text": "Delegate a real Node route to the SDK service.",
+    "explanation": "The Node process can run the CLI-backed TypeScript Agent SDK. Request disconnects abort owned SDK work and response writes respect backpressure.",
+    "code": "const response = await (route.endsWith(\"/stream\")\n  ? handlers.stream(request)\n  : handlers.query(request));\nres.writeHead(response.status, Object.fromEntries(response.headers));\nres.flushHeaders();\nconst reader = response.body?.getReader();\ntry {\n  if (reader)"
+  },
+  {
+    "number": 5,
+    "title": "Prompt; no built-in tools",
+    "source": "backend/src/agent-service.ts",
+    "language": "typescript",
+    "text": "Invoke the actual TypeScript Claude Agent SDK.",
+    "explanation": "The SDK owns the model transport and CLI runtime. This source is the application boundary that initiates inference, rather than an invented provider HTTP call.",
+    "code": "const conversation = queryFn({\n  prompt,\n  options: agentOptions(config, controller),\n});\ntry {\n  for await (const message of conversation) {\n    if (message.type === \"result\") return resultData(message);"
+  },
+  {
+    "number": 6,
+    "title": "Model response",
+    "source": "backend/src/agent-service.ts",
+    "language": "typescript",
+    "text": "Observe SDK messages from the model exchange.",
+    "explanation": "The same async iterator powers simple and stream modes. Tools, settings, skills, MCP, plugins and persisted sessions are explicitly disabled.",
+    "code": "  for await (const message of conversation) {\n    if (message.type === \"result\") return resultData(message);\n  }\n  throw new Error(\"Agent ended without a result\");\n} finally {\n  conversation.close?.();\n}"
+  },
+  {
+    "number": 7,
+    "title": "Safe SDK message",
+    "source": "backend/src/agent-service.ts",
+    "language": "typescript",
+    "text": "Project only safe SDK presentation fields.",
+    "explanation": "Text, subtype/model and final metrics are allowlisted. Thinking, paths, tool arguments, session IDs and raw configuration are excluded; exact key occurrences are redacted.",
+    "code": "    yield { type, summary, data };\n  }\n  if (!foundResult) throw new Error(\"Agent ended without a result\");\n} finally {"
+  },
+  {
+    "number": 8,
+    "title": "SSE message event",
+    "source": "backend/src/handlers.ts",
+    "language": "typescript",
+    "text": "Encode UTF-8 SSE messages.",
+    "explanation": "Heartbeat comments and a three-minute deadline bound the stream. Request cancellation and reader cancellation clean up timers and abort execution.",
+    "code": "const sendEvent = (event: string, data: unknown) => {\n  if (!closed)\n    streamController.enqueue(\n      encoder.encode(\n        `event: ${event}\\ndata: ${JSON.stringify(data)}\\n\\n`,\n      ),\n    );\n};"
+  },
+  {
+    "number": 9,
+    "title": "Update typed state",
+    "source": "android/app/src/main/java/com/luiscoco/smallestagent/compose/LabViewModel.kt",
+    "language": "kotlin",
+    "text": "Update native StateFlow with timestamped events.",
+    "explanation": "The display cap does not prevent final result processing. LazyColumn renders timeline entries without mounting all rows at once.",
+    "code": "            val rows = if (old.messages.size < 500) old.messages + TimelineMessage(message, (System.nanoTime() - started) / 1e9) else old.messages\n            old.copy(messages = rows, result = if (message.type == \"ResultMessage\") AgentResult.fromJson(message.data) else old.result)\n        }\n    }\n}\nmutable.update { it.copy(result = result, status = if (result.isError) \"error\" else \"success\", error = if (result.isError) result.result else \"\", notice = if (result.isError) \"The agent reported an error.\" else \"Answer received.\") }"
+  },
+  {
+    "number": 10,
+    "title": "ResultMessage fields",
+    "source": "backend/src/agent-service.ts",
+    "language": "typescript",
+    "text": "Normalize final answer and metrics.",
+    "explanation": "Non-success SDK subtypes remain errors even when is_error=false. Cost may be null, which the native screen labels unavailable.",
+    "code": "function resultData(message: SDKResultMessage): AgentResult {\n  return {\n    result:\n      message.subtype === \"success\"\n        ? redact(message.result || \"\")\n        : \"The agent could not complete this prompt. Check the server configuration.\",\n    num_turns: message.num_turns,\n    duration_ms: message.duration_ms,\n    total_cost_usd: message.total_cost_usd ?? null,\n    is_error: message.subtype !== \"success\" || Boolean(message.is_error),\n  };\n}"
+  },
+  {
+    "number": 11,
+    "title": "SSE ResultMessage",
+    "source": "android/app/src/main/java/com/luiscoco/smallestagent/compose/AgentApi.kt",
+    "language": "kotlin",
+    "text": "Validate and dispatch the final ResultMessage.",
+    "explanation": "Kotlin checks public message/result contracts before updating the UI. ResultMessage is a safe projection label rather than a raw SDK class name.",
+    "code": "            val message = AgentMessage.fromJson(json)\n            if (message.type == \"ResultMessage\") finalResult = AgentResult.fromJson(message.data)\n            onMessage(message)\n        }\n    }\n}"
+  },
+  {
+    "number": 12,
+    "title": "Render answer + metrics",
+    "source": "android/app/src/main/java/com/luiscoco/smallestagent/compose/LessonComponents.kt",
+    "language": "kotlin",
+    "text": "Render model content as native text and colored code.",
+    "explanation": "Compose never executes model HTML. Supported headings, bold, standalone HTTP(S) links and fenced code become native components; unsupported markup remains text.",
+    "code": "@Composable fun MarkdownAnswer(text: String) {\n    val uri = LocalUriHandler.current\n    // Preserve fence blocks while separating plain paragraphs.\n    val blocks = remember(text) {\n        val matches = Regex(\"\"\"```([^\\n]*)\\n([\\s\\S]*?)```\"\"\").findAll(text).toList()\n        val result = mutableListOf<Triple<Boolean, String, String>>()\n        var at = 0\n        matches.forEach { match -> if (match.range.first > at) result += Triple(false, \"\", text.substring(at, match.range.first)); result += Triple(true, match.groupValues[1].trim(), match.groupValues[2]); at = match.range.last + 1 }\n        if (at < text.length) result += Triple(false, \"\", text.substring(at))\n        result\n    }\n    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {\n        blocks.forEach { (code, language, body) ->\n            if (code) CodeBlock(body, language.ifEmpty { \"text\" }) else body.lines().filter { it.isNotBlank() }.forEach { line ->"
+  },
+  {
+    "number": 13,
+    "title": "SSE done event",
+    "source": "android/app/src/main/java/com/luiscoco/smallestagent/compose/AgentApi.kt",
+    "language": "kotlin",
+    "text": "Require final result and done before resolving.",
+    "explanation": "Okio and the SSE reader handle split UTF-8, CRLF, comments and multiline data. A done event never overrides the final error flag.",
+    "code": "    if (!completed || finalResult == null) throw ApiFailure(\"The connection ended before the agent finished.\")\n    finalResult!!\n}"
+  },
+  {
+    "number": 14,
+    "title": "SSE error; no done",
+    "source": "backend/src/handlers.ts",
+    "language": "typescript",
+    "text": "Emit a safe SSE failure without done.",
+    "explanation": "Simple-mode failures return 502. Raw provider errors and submitted values do not enter public error messages.",
+    "code": "} catch {\n  sendEvent(\"error\", { detail: FAILURE });\n} finally {\n  finish();"
+  },
+  {
+    "number": 15,
+    "title": "Error + snackbar",
+    "source": "android/app/src/main/java/com/luiscoco/smallestagent/compose/LabViewModel.kt",
+    "language": "kotlin",
+    "text": "Show a safe native error and snackbar.",
+    "explanation": "Cancellation aborts OkHttp, which disconnects the server request. Finally clears the clock and unlocks controls.",
+    "code": "    } catch (error: Exception) {\n        val detail = if (error is CancellationException) \"The request was canceled or timed out.\" else error.message ?: \"The request could not finish.\"\n        mutable.update { it.copy(status = \"error\", error = detail, notice = detail) }\n    } finally {\n        clock.cancel(); activeApi?.cancel(); activeApi = null; locked = false\n        mutable.update { it.copy(elapsed = (System.nanoTime() - started) / 1e9) }\n    }\n}"
+  },
+  {
+    "number": 16,
+    "title": "Key: SSE error / input: 422",
+    "source": "backend/src/handlers.ts",
+    "language": "typescript",
+    "text": "Reject missing credentials before calling the SDK.",
+    "explanation": "Simple mode returns 503. Streaming sends error without done. Invalid input and missing keys never spend model credits.",
+    "code": "if (!config.apiKeyConfigured) {\n  sendEvent(\"error\", { detail: MISSING_KEY });\n  finish();\n  return;"
+  }
+]
